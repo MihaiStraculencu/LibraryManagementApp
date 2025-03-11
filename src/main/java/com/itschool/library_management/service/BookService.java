@@ -8,6 +8,7 @@ import com.itschool.library_management.repository.AuthorRepository;
 import com.itschool.library_management.repository.BookRepository;
 import com.itschool.library_management.repository.GenreRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -79,25 +80,39 @@ public class BookService {
         return dto;
     }
 
-    private Book convertToEntity(BookDto dto) {
-        Book book = new Book();
-        book.setId(dto.getId());
+    @Transactional
+    public Book convertToEntity(BookDto dto) {
+        Book book;
+
+        // daca update existing book, fetch pe primul
+        if (dto.getId() != null) {
+            book = bookRepository.findById(dto.getId())
+                    .orElseGet(Book::new);
+        } else {
+            book = new Book();
+        }
+
+        // Update la properties
         book.setTitle(dto.getTitle());
         book.setIsbn(dto.getIsbn());
         book.setPublicationYear(dto.getPublicationYear());
 
         if (dto.getGenreId() != null) {
             Genre genre = genreRepository.findById(dto.getGenreId())
-                    .orElseGet(() -> null);
+                    .orElse(null);
             book.setGenre(genre);
+        } else {
+            book.setGenre(null);
         }
 
         if (dto.getAuthorIds() != null && !dto.getAuthorIds().isEmpty()) {
             Set<Author> authors = dto.getAuthorIds().stream()
-                    .map(authorId -> authorRepository.findById(authorId).orElseGet(() -> null))
+                    .map(authorId -> authorRepository.findById(authorId).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toSet());
             book.setAuthors(authors);
+        } else {
+            book.setAuthors(new HashSet<>());
         }
 
         return book;
