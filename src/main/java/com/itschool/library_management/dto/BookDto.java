@@ -10,6 +10,8 @@ public class BookDto {
     private Set<Long> authorIds;
     private Long genreId;
 
+    private Long publisherId;
+
     public BookDto() {
     }
 
@@ -68,6 +70,14 @@ public class BookDto {
 
     public void setGenreId(Long genreId) {
         this.genreId = genreId;
+    }
+
+    public Long getPublisherId() {
+        return publisherId;
+    }
+
+    public void setPublisherId(Long publisherId) {
+        this.publisherId = publisherId;
     }
 
     @Override
