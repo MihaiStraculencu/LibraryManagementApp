@@ -6,6 +6,7 @@ import java.util.Set;
 
 @Entity
 public class Book {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -14,6 +15,12 @@ public class Book {
     private String isbn;
     private Integer publicationYear;
 
+    @ManyToOne
+    @JoinColumn(name = "publisher_id")
+    private Publisher publisher;
+
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Review> reviews = new HashSet<>();
     @ManyToMany
     @JoinTable(
             name = "book_author",
@@ -29,13 +36,15 @@ public class Book {
     public Book() {
     }
 
-    public Book(Long id, String title, String isbn, Integer publicationYear, Set<Author> authors, Genre genre) {
+    public Book(Long id, String title, String isbn, Integer publicationYear,
+                Set<Author> authors, Genre genre, Publisher publisher) {
         this.id = id;
         this.title = title;
         this.isbn = isbn;
         this.publicationYear = publicationYear;
         this.authors = authors;
         this.genre = genre;
+        this.publisher = publisher;
     }
 
     public Long getId() {
@@ -84,5 +93,32 @@ public class Book {
 
     public void setGenre(Genre genre) {
         this.genre = genre;
+    }
+    public Publisher getPublisher() {
+        return publisher;
+    }
+
+    public void setPublisher(Publisher publisher) {
+        this.publisher = publisher;
+    }
+
+    public Set<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(Set<Review> reviews) {
+        this.reviews = reviews;
+    }
+
+    // Helper method to add a review
+    public void addReview(Review review) {
+        reviews.add(review);
+        review.setBook(this);
+    }
+
+    // Helper method to remove a review
+    public void removeReview(Review review) {
+        reviews.remove(review);
+        review.setBook(null);
     }
 }

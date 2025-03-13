@@ -4,11 +4,14 @@ import com.itschool.library_management.dto.BookDto;
 import com.itschool.library_management.entity.Author;
 import com.itschool.library_management.entity.Book;
 import com.itschool.library_management.entity.Genre;
+import com.itschool.library_management.entity.Publisher;
 import com.itschool.library_management.repository.AuthorRepository;
 import com.itschool.library_management.repository.BookRepository;
 import com.itschool.library_management.repository.GenreRepository;
+import com.itschool.library_management.repository.PublisherRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,11 +22,13 @@ public class BookService {
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
     private final GenreRepository genreRepository;
+    private final PublisherRepository publisherRepository;
 
-    public BookService(BookRepository bookRepository, AuthorRepository authorRepository, GenreRepository genreRepository) {
+    public BookService(BookRepository bookRepository, AuthorRepository authorRepository, GenreRepository genreRepository, PublisherRepository publisherRepository) {
         this.bookRepository = bookRepository;
         this.authorRepository = authorRepository;
         this.genreRepository = genreRepository;
+        this.publisherRepository = publisherRepository;
     }
 
     public List<BookDto> getAllBooks() {
@@ -72,6 +77,10 @@ public class BookService {
             dto.setGenreId(book.getGenre().getId());
         }
 
+        if (book.getPublisher() != null) {
+            dto.setPublisherId(book.getPublisher().getId());
+        }
+
         Set<Long> authorIds = book.getAuthors().stream()
                 .map(Author::getId)
                 .collect(Collectors.toSet());
@@ -115,6 +124,13 @@ public class BookService {
             book.setAuthors(new HashSet<>());
         }
 
+        if (dto.getPublisherId() != null) {
+            Publisher publisher = publisherRepository.findById(dto.getPublisherId())
+                    .orElseGet(() -> null);
+            book.setPublisher(publisher);
+        }
+
         return book;
     }
+
 }
